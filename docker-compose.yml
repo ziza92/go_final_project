@@ -1,0 +1,9 @@
+services:
+  web:
+    build:
+      context: ./
+      dockerfile: ./Dockerfile
+    ports:
+      - 7540:7540
+    volumes:
+      - ./scheduler.db:/scheduler.db
