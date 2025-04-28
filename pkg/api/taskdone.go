@@ -2,9 +2,10 @@ package api
 
 import (
 	"fmt"
-	"golf/pkg/db"
 	"net/http"
 	"time"
+
+	"golf/pkg/db"
 )
 
 func taskDoneHandler(w http.ResponseWriter, r *http.Request) {

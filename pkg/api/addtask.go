@@ -4,11 +4,12 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"golf/pkg/db"
 	"io"
 	"log"
 	"net/http"
 	"time"
+
+	"golf/pkg/db"
 )
 
 func addTaskHandler(w http.ResponseWriter, r *http.Request) {

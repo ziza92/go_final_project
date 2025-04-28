@@ -3,8 +3,9 @@ package api
 import (
 	"encoding/json"
 	"fmt"
-	"golf/pkg/db"
 	"net/http"
+
+	"golf/pkg/db"
 )
 
 // Обработать запрос на обновление задачи

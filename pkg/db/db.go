@@ -9,8 +9,8 @@ import (
 )
 
 var (
-	db     *sql.DB
-	schema = `
+	DBFilePath string
+	schema     = `
 			CREATE TABLE IF NOT EXISTS scheduler (
 				id INTEGER PRIMARY KEY AUTOINCREMENT,
 				date CHAR(8) NOT NULL DEFAULT "",
@@ -23,24 +23,25 @@ var (
 )
 
 // Создать таблицу, если её нет
-func Init(dbFile string) error {
+func Init(dbFile string) (*sql.DB, error) {
+	DBFilePath = dbFile
 	// Проверка, существует ли база данных
-	_, err := os.Stat(dbFile)
+	_, err := os.Stat(DBFilePath)
 	if err != nil {
 		// Если база данных не существует, выводим сообщение
-		fmt.Println("Таблица не найдена, создаем...")
+		fmt.Println("База данных не найдена, создаем...")
 	}
 
-	db, err = sql.Open("sqlite", dbFile)
+	db, err := sql.Open("sqlite", DBFilePath)
 	if err != nil {
-		return fmt.Errorf("невозможно открыть таблицу: %v", err)
+		return nil, fmt.Errorf("невозможно открыть таблицу: %v", err)
 	}
 
 	// Создать таблицу, если её нет
 	_, err = db.Exec(schema)
 	if err != nil {
-		return fmt.Errorf("ошибка выполнения schema: %v", err)
+		return nil, fmt.Errorf("ошибка выполнения schema: %v", err)
 	}
 
-	return nil
+	return db, nil
 }

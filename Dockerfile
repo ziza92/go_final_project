@@ -1,7 +1,4 @@
-FROM ubuntu:latest
-
-RUN apt update
-RUN apt install -y golang ca-certificates
+FROM golang:latest
 
 ENV TODO_PORT=7540
 ENV TODO_DBFILE=/scheduler.db
