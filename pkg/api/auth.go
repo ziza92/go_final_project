@@ -33,7 +33,7 @@ func auth(next http.HandlerFunc) http.HandlerFunc {
 			}
 			return []byte(pass), nil
 		})
-		fmt.Println(token.Raw)
+
 		if err != nil {
 			writeJson(w, map[string]string{"error": "invalid token"}, http.StatusUnauthorized)
 			return
