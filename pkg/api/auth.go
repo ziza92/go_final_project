@@ -5,20 +5,12 @@ import (
 	"encoding/hex"
 	"fmt"
 	"net/http"
-	"os"
 
 	"github.com/golang-jwt/jwt/v5"
 )
 
-func auth(next http.HandlerFunc) http.HandlerFunc {
+func auth(next http.HandlerFunc, pass string) http.HandlerFunc {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-
-		pass := os.Getenv("TODO_PASSWORD")
-		if pass == "" {
-
-			next(w, r)
-			return
-		}
 
 		cookie, err := r.Cookie("token")
 		if err != nil || cookie.Value == "" {
@@ -26,7 +18,7 @@ func auth(next http.HandlerFunc) http.HandlerFunc {
 			return
 		}
 
-		token, err := jwt.Parse(cookie.Value, func(token *jwt.Token) (interface{}, error) {
+		token, err := jwt.Parse(cookie.Value, func(token *jwt.Token) (any, error) {
 
 			if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 				return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])

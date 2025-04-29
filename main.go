@@ -3,19 +3,22 @@ package main
 import (
 	"log"
 	"os"
-	"strconv"
 
 	"golf/pkg/api"
 	"golf/pkg/db"
 	"golf/pkg/server"
-	"golf/tests"
+)
+
+const (
+	PORT   = "7540"
+	DBFILE = "./scheduler.db"
 )
 
 func main() {
 	// определение пути к файлу (со звездочкой)
 	dbFile := os.Getenv("TODO_DBFILE")
-	if dbFile == "" {
-		dbFile = tests.DBFile
+	if len(dbFile) == 0 {
+		dbFile = DBFILE
 	}
 
 	db, err := db.Init(dbFile)
@@ -27,11 +30,16 @@ func main() {
 	port := os.Getenv("TODO_PORT")
 	if len(port) == 0 {
 		// Используем порт по умолчанию
-		port = strconv.Itoa(tests.Port)
+		port = PORT
+	}
+
+	pass := os.Getenv("TODO_PASSWORD")
+	if len(pass) == 0 {
+		pass = ""
 	}
 
 	//инициализация обработчиков
-	api.Init()
+	api.Init(pass)
 
 	err = server.StartServer(port)
 	if err != nil {

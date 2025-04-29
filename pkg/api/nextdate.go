@@ -3,6 +3,7 @@ package api
 import (
 	"fmt"
 	"net/http"
+	"slices"
 	"strconv"
 	"strings"
 	"time"
@@ -86,6 +87,69 @@ func NextDate(now time.Time, dstart string, repeat string) (string, error) {
 			date = date.AddDate(0, 0, 1)
 		}
 
+	case "m":
+		if len(parts) < 2 {
+			return "", fmt.Errorf("ну указано количество месяцев: %s", repeat)
+		}
+
+		partsDay := strings.Split(parts[1], ",")
+		days := []int{}
+		for _, part := range partsDay {
+			day, err := strconv.Atoi(part)
+			if err != nil {
+				return "", fmt.Errorf("ошибка при распознавании дня: %v", err)
+			}
+			if day < -31 || day == 0 || day > 31 {
+				return "", fmt.Errorf("некорректное значение дня: %d", day)
+			}
+			days = append(days, day)
+		}
+
+		months := []int{}
+		if len(parts) >= 3 {
+			partsMonth := strings.Split(parts[2], ",")
+			for _, part := range partsMonth {
+				month, err := strconv.Atoi(part)
+				if err != nil {
+					return "", fmt.Errorf("ошибка при распознавании месяца: %v", err)
+				}
+				if month < 1 || month > 12 {
+					return "", fmt.Errorf("некорректное значение месяца: %d", month)
+				}
+				months = append(months, month)
+			}
+		}
+
+		for {
+			if afterNow(date, now) {
+				year, month := date.Year(), date.Month()
+				currentDay := date.Day()
+
+				if len(months) > 0 {
+					matchMonth := slices.Contains(months, int(month))
+					if !matchMonth {
+						date = date.AddDate(0, 0, 1)
+						continue
+					}
+				}
+
+				lastDayOfMonth := time.Date(year, month+1, 0, 0, 0, 0, 0, time.UTC).Day()
+				for _, day := range days {
+					if day == -3 {
+						return "", fmt.Errorf("некорректное значение дня: %d", day)
+					}
+					correctDay := day
+					if correctDay < 0 {
+						correctDay = lastDayOfMonth + day + 1
+					}
+					if correctDay == currentDay {
+						return date.Format(ConstDate), nil
+					}
+				}
+			}
+			date = date.AddDate(0, 0, 1)
+		}
+
 	default:
 		return "", fmt.Errorf("неподдерживаемый формат даты: %s", repeat)
 	}
@@ -115,10 +179,6 @@ func nextDayHandler(w http.ResponseWriter, r *http.Request) {
 
 	if dateStr == "" {
 		http.Error(w, "date parameter is required", http.StatusBadRequest)
-		return
-	}
-	if repeat == "" {
-		http.Error(w, "repeat parameter is required", http.StatusBadRequest)
 		return
 	}
 

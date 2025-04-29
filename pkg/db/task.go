@@ -17,12 +17,6 @@ type Task struct {
 func AddTask(task *Task) (int64, error) {
 	var id int64
 
-	// Открыть таблицу
-	db, err := sql.Open("sqlite", DBFilePath)
-	if err != nil {
-		return id, fmt.Errorf("невозможно открыть таблицу: %v", err)
-	}
-
 	query := `INSERT INTO scheduler (date, title, comment, repeat) VALUES (?, ?, ?, ?)`
 	res, err := db.Exec(query, task.Date, task.Title, task.Comment, task.Repeat)
 	if err == nil {
@@ -34,12 +28,6 @@ func AddTask(task *Task) (int64, error) {
 
 // Обновление задачи
 func UpdateTask(task *Task) error {
-	// Открыть таблицу
-	db, err := sql.Open("sqlite", DBFilePath)
-	if err != nil {
-		return fmt.Errorf("невозможно открыть таблицу: %v", err)
-	}
-
 	query := `UPDATE scheduler SET date = ?, title = ?, comment = ?, repeat = ? WHERE id = ?`
 	res, err := db.Exec(query, task.Date, task.Title, task.Comment, task.Repeat, task.ID)
 	if err != nil {
@@ -59,17 +47,11 @@ func UpdateTask(task *Task) error {
 
 // Получить задачу
 func GetTask(id string) (*Task, error) {
-	// Открыть таблицу
-	db, err := sql.Open("sqlite", DBFilePath)
-	if err != nil {
-		return nil, fmt.Errorf("невозможно открыть таблицу: %v", err)
-	}
-
 	query := `SELECT id, date, title, comment, repeat FROM scheduler WHERE id = ?`
 
 	task := &Task{}
 
-	err = db.QueryRow(query, id).Scan(&task.ID, &task.Date, &task.Title, &task.Comment, &task.Repeat)
+	err := db.QueryRow(query, id).Scan(&task.ID, &task.Date, &task.Title, &task.Comment, &task.Repeat)
 	if err != nil {
 		if err == sql.ErrNoRows {
 			// Вернуть ошибку, если задача не найдена
@@ -84,12 +66,6 @@ func GetTask(id string) (*Task, error) {
 
 // Поиск задач
 func Tasks(limit int, search string, dateSearch string) ([]*Task, error) {
-	// Открыть таблицу
-	db, err := sql.Open("sqlite", DBFilePath)
-	if err != nil {
-		return nil, fmt.Errorf("невозможно открыть таблицу: %v", err)
-	}
-
 	query := `SELECT id, date, title, comment, repeat FROM scheduler`
 
 	// Если есть параметр search, добавляем условие LIKE
@@ -149,12 +125,6 @@ func Tasks(limit int, search string, dateSearch string) ([]*Task, error) {
 }
 
 func DeleteTask(id string) error {
-	// Открыть таблицу
-	db, err := sql.Open("sqlite", DBFilePath)
-	if err != nil {
-		return fmt.Errorf("невозможно открыть таблицу: %v", err)
-	}
-
 	query := `DELETE FROM scheduler WHERE id = ?`
 	res, err := db.Exec(query, id)
 	if err != nil {
@@ -171,12 +141,6 @@ func DeleteTask(id string) error {
 }
 
 func UpdateDate(next, id string) error {
-	// Открыть таблицу
-	db, err := sql.Open("sqlite", DBFilePath)
-	if err != nil {
-		return fmt.Errorf("невозможно открыть таблицу: %v", err)
-	}
-
 	query := `UPDATE scheduler SET date = ? WHERE id = ?`
 	res, err := db.Exec(query, next, id)
 	if err != nil {
